@@ -84,3 +84,19 @@ class ClientDAO:
         finally:
             cursor.close()
             connection.close()
+
+    @staticmethod
+    def get_next_client_id() -> int:
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            query = "SELECT MAX(id) FROM clients"
+            cursor.execute(query)
+            result = cursor.fetchone()
+            return result[0] + 1 if result[0] else 1
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return 1
+        finally:
+            cursor.close()
+            connection.close()
