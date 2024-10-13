@@ -12,6 +12,7 @@ class UserDAO:
             query = "INSERT INTO users (name, username, password, profile) VALUES (%s, %s, %s, %s)"
             cursor.execute(query, (user.name, user.username, user.password, user.profile))
             connection.commit()
+            #obtenemos el id del usuario creado
             return cursor.lastrowid
         except mysql.connector.Error as err:
             print(f"Error: {err}")
