@@ -44,10 +44,15 @@ class BuyController:
             msg['message'] = 'La fecha debe seguir el formato DD-MM-YYYY'
             return msg
 
+        # Si todos los datos son válidos
+        msg['status'] = True
+        msg['type'] = 'Success'
+        return msg
+
     def create_buy(self, folio: str, user_id: int, iup_supplier: str, total: float, date: str) -> dict:
         """Crea una compra"""
         msg = self.validate_buy_data(folio, user_id, iup_supplier, total, date)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.buy_service.create_buy(folio, user_id, iup_supplier, total, date):
             msg['status'] = True
@@ -92,7 +97,7 @@ class BuyController:
     def update_buy(self, folio: str, user_id: int, iup_supplier: str, total: float, date: str) -> dict:
         """Actualiza una compra"""
         msg = self.validate_buy_data(folio, user_id, iup_supplier, total, date)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.buy_service.update_buy(folio, user_id, iup_supplier, total, date):
             msg['status'] = True
