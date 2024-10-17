@@ -5,7 +5,7 @@ class ProductController:
         self.product_service = ProductService()
 
     @staticmethod
-    def validate_product_data(upc: str, name: str, stock: int, description: str, price: float) -> dict:
+    def validate_product_data(upc: str, name: str, description: str, price: float) -> dict:
         """Valida los datos de un producto"""
         msg = {
             'status': False,
@@ -13,7 +13,7 @@ class ProductController:
             'message': ''
         }
         # 1. Validar todos los campos obligatorios
-        if not upc or not name or not stock or not description or not price:
+        if not upc or not name  or not description or not price:
             msg['message'] = 'Todos los campos son obligatorios'
             return msg
 
@@ -25,11 +25,6 @@ class ProductController:
         # 3. Validar que el nombre sea un string de máximo 100 caracteres
         if len(name) > 100:
             msg['message'] = 'El nombre debe ser un string de máximo 100 caracteres'
-            return msg
-
-        # 4. Validar que el stock sea un entero positivo
-        if not stock > 0:
-            msg['message'] = 'El stock debe ser un entero positivo'
             return msg
 
         # 5. Validar que la descripción sea un string de máximo 200 caracteres
@@ -47,12 +42,13 @@ class ProductController:
         msg['type'] = 'Success'
         return msg
 
-    def create_product(self, upc: str, name: str, stock: int, description: str, price: float) -> dict:
+    def create_product(self, upc: str, name: str, stock:int, description: str, price: float) -> dict:
         """Crea un producto"""
-        msg = self.validate_product_data(upc, name, stock, description, price)
+        msg = self.validate_product_data(upc, name, description, price)
         if not msg['status']:
             return msg
-        if self.product_service.create_product(upc, name, stock, description, price):
+        created = self.product_service.create_product(upc, name, stock, description, price)
+        if created is not None:
             msg['status'] = True
             msg['type'] = 'Success'
             msg['message'] = 'Producto creado exitosamente'
@@ -110,7 +106,7 @@ class ProductController:
 
     def update_product(self, upc: str, name: str, stock: int, description: str, price: float) -> dict:
         """Actualiza un producto"""
-        msg = self.validate_product_data(upc, name, stock, description, price)
+        msg = self.validate_product_data(upc, name, description, price)
         if not msg['status']:
             return msg
         if self.product_service.update_product(upc, name, stock, description, price):
