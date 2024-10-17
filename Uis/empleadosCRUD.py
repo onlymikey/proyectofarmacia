@@ -35,7 +35,7 @@ class Empleados:
         self.password_entry.grid(row=4, column=1, padx=10, pady=10)
 
         ttk.Label(users_frame, text="Perfil:").grid(row=2, column=2, padx=10, pady=10)
-        self.perfil_entry = ttk.Combobox(users_frame, values=["Admin", "Grente", "Cajero"], state='readonly')
+        self.perfil_entry = ttk.Combobox(users_frame, values=["Admin", "Gerente", "Cajero"], state='readonly')
         self.perfil_entry.grid(row=2, column=3, padx=10, pady=10)
 
         ttk.Button(users_frame, text="Nuevo", command=self.nuevo_user).grid(row=5, column=0, padx=10, pady=10)

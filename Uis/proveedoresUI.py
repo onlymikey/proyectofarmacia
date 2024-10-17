@@ -51,7 +51,7 @@ class SuppliersCRUD:
         self.iup_display.config(state='readonly')
 
         self.company_name_entry.delete(0, tk.END)
-        self.company_name_entry.insert(0, supplier['company_name'])  # Asegúrate de que la clave sea correcta
+        self.company_name_entry.insert(0, supplier['companyName'])  # Asegúrate de que la clave sea correcta
 
     def new_supplier(self):
         self.clear_fields()
