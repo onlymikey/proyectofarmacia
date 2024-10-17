@@ -45,10 +45,15 @@ class SaleController:
             msg['message'] = 'La fecha debe seguir el formato DD-MM-YYYY'
             return msg
 
+        # Si todos los datos son válidos
+        msg['status'] = True
+        msg['type'] = 'Success'
+        return msg
+
     def create_sale(self, folio: str, client_id: int, user_id: int, date: str, total: float) -> dict:
         """Crea una venta"""
         msg = self.validate_sale_data(folio, client_id, user_id, date, total)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.sale_service.create_sale(folio, client_id, user_id, date, total):
             msg['status'] = True
@@ -93,7 +98,7 @@ class SaleController:
     def update_sale(self, folio: str, client_id: int, user_id: int, date: str, total: float) -> dict:
         """Actualiza una venta"""
         msg = self.validate_sale_data(folio, client_id, user_id, date, total)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.sale_service.update_sale(folio, client_id, user_id, date, total):
             msg['status'] = True

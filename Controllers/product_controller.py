@@ -42,10 +42,15 @@ class ProductController:
             msg['message'] = 'El precio debe ser un número positivo'
             return msg
 
+        # Si todos los datos son válidos
+        msg['status'] = True
+        msg['type'] = 'Success'
+        return msg
+
     def create_product(self, upc: str, name: str, stock: int, description: str, price: float) -> dict:
         """Crea un producto"""
         msg = self.validate_product_data(upc, name, stock, description, price)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.product_service.create_product(upc, name, stock, description, price):
             msg['status'] = True
@@ -106,7 +111,7 @@ class ProductController:
     def update_product(self, upc: str, name: str, stock: int, description: str, price: float) -> dict:
         """Actualiza un producto"""
         msg = self.validate_product_data(upc, name, stock, description, price)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.product_service.update_product(upc, name, stock, description, price):
             msg['status'] = True

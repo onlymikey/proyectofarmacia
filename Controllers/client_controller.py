@@ -31,11 +31,16 @@ class ClientController:
             msg['message'] = 'El teléfono debe ser un string de máximo 20 caracteres'
             return msg
 
+        # Si todos los datos son válidos
+        msg['status'] = True
+        msg['type'] = 'Success'
+        return msg
+
 
     def create_client(self, name: str, email: str, phone: str) -> dict:
         """Crea un cliente"""
         msg = self.validate_client_data(name, email, phone)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.client_service.create_client(name, email, phone):
             msg['status'] = True
@@ -80,7 +85,7 @@ class ClientController:
     def update_client(self, client_id: int, name: str, email: str, phone: str) -> dict:
         """Actualiza un cliente"""
         msg = self.validate_client_data(name, email, phone)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.client_service.update_client(client_id, name, email, phone):
             msg['status'] = True

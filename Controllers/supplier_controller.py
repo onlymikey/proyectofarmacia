@@ -27,11 +27,16 @@ class SupplierController:
             msg['message'] = 'El nombre de la empresa debe ser un string de máximo 50 caracteres'
             return msg
 
+        # Si todos los datos son válidos
+        msg['status'] = True
+        msg['type'] = 'Success'
+        return msg
+
 
     def create_supplier(self, iup: str, companyName: str) -> dict:
         """Crea un proveedor"""
         msg = self.validate_supplier_data(iup, companyName)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.supplier_service.create_supplier(iup, companyName):
             msg['status'] = True
@@ -76,7 +81,7 @@ class SupplierController:
     def update_supplier(self, iup: str, companyName: str) -> dict:
         """Actualiza un proveedor"""
         msg = self.validate_supplier_data(iup, companyName)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.supplier_service.update_supplier(iup, companyName):
             msg['status'] = True

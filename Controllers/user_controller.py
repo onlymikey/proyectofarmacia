@@ -47,10 +47,15 @@ class UserController:
             msg['message'] = 'El perfil debe ser un string de máximo 50 caracteres'
             return msg
 
+        # Si todos los datos son válidos
+        msg['status'] = True
+        msg['type'] = 'Success'
+        return msg
+
     def create_user(self, name: str, username: str, password: str, profile: str) -> dict:
         """Crea un usuario"""
         msg = self.validate_user_data(name, username, password, profile)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.user_service.create_user(name, username, password, profile):
             msg['status'] = True
@@ -95,7 +100,7 @@ class UserController:
     def update_user(self, user_id: int, name: str, username: str, password: str, profile: str) -> dict:
         """Actualiza un usuario"""
         msg = self.validate_user_data(name, username, password, profile)
-        if msg['status']:
+        if not msg['status']:
             return msg
         if self.user_service.update_user(user_id, name, username, password, profile):
             msg['status'] = True
