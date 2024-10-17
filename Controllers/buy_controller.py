@@ -33,7 +33,7 @@ class BuyController:
             return msg
 
         # 5. Validar que el total sea un número positivo
-        if not total > 0:
+        if not total >= 0:
             msg['message'] = 'El total debe ser un número positivo'
             return msg
 
