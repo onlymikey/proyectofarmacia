@@ -10,7 +10,9 @@ class UserService:
 
     @staticmethod
     def get_user_by_id(user_id: int) -> Optional[dict]:
+        print(user_id)
         return UserDAO.get_user_by_id(user_id)
+        
 
     @staticmethod
     def get_all_users() -> List[dict]:
