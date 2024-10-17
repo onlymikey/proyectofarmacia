@@ -1,11 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
-from .clientesCRUD import ClientesCRUD
+from Uis.clientesCRUD import ClientesCRUD
+from Controllers.client_controller import ClientController
+
 
 class Clientes:
     def __init__(self, parent):
         self.parent = parent
-        self.setup_ui()
+        self.client_controller = ClientController()  # Inicializar el controlador
+        self.setup_ui()  # Llamar al método de configuración de la interfaz
 
     def setup_ui(self):
         # Frame superior (búsqueda y botones)
@@ -71,8 +74,9 @@ class Clientes:
         ventana_nueva.title("Gestión de Clientes")
         ventana_nueva.geometry("600x400")  # Ajusta el tamaño de la ventana
 
-        # Cargar la interfaz de clientes
-        clientes_ui = ClientesCRUD(ventana_nueva)
+        # Cargar la interfaz de clientes pasando el controlador también
+        clientes_ui = ClientesCRUD(ventana_nueva, self.client_controller)
+
 
     def salvar(self):
         pass

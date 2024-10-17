@@ -34,6 +34,7 @@ class UserDAO:
         finally:
             cursor.close()
             connection.close()
+            print(user_id)
 
     @staticmethod
     def get_all_users() -> List[dict]:

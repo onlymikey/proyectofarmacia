@@ -5,6 +5,7 @@ from Uis.clientesUI import Clientes
 from Uis.inventarioUI import Inventario
 from Uis.compraUI import Compra
 from Uis.empleadosCRUD import Empleados
+from Uis.proveedoresUI import SuppliersCRUD
 
 class App:
     def __init__(self, master):
@@ -43,6 +44,7 @@ class App:
 
         # Añadir opciones al menú
         file_menu.add_command(label="Empleados", command=self.abrir_empleados)
+        file_menu.add_command(label="Proveedores", command=self.abrir_proveedores)
         file_menu.add_separator()
         file_menu.add_command(label="Salir", command=self.master.quit)
 
@@ -51,6 +53,12 @@ class App:
         ventana_empleados.title("Empleados")
         ventana_empleados.geometry("600x300")
         interfaz = Empleados(ventana_empleados)        # Pasa ventana_empleados como parent
+
+    def abrir_proveedores(self):
+        ventana_proveedores = tk.Toplevel(self.master)  # Usa self.master en lugar de self.menubar
+        ventana_proveedores.title("Proveedores")
+        ventana_proveedores.geometry("600x300")
+        interfaz = SuppliersCRUD(ventana_proveedores)        # Pasa ventana_empleados como parent
 
 if __name__ == "__main__":
     root = tk.Tk()
