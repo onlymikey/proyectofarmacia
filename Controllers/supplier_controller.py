@@ -38,7 +38,8 @@ class SupplierController:
         msg = self.validate_supplier_data(iup, companyName)
         if not msg['status']:
             return msg
-        if self.supplier_service.create_supplier(iup, companyName):
+        created = self.supplier_service.create_supplier(iup, companyName)
+        if created is not None:
             msg['status'] = True
             msg['type'] = 'Success'
             msg['message'] = 'Proveedor creado exitosamente'
