@@ -33,7 +33,7 @@ class ProductController:
             return msg
 
         # 6. Validar que el precio sea un número positivo
-        if not price >= 0:
+        if not price > 0:
             msg['message'] = 'El precio debe ser un número positivo'
             return msg
 
