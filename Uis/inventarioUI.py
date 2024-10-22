@@ -23,7 +23,7 @@ class Inventario:
         btn_nuevo = tk.Button(frame_superior, text="CRUD Productos", command=self.nuevo)
         btn_nuevo.grid(row=0, column=3, padx=5)
 
-        btn_actualizar = tk.Button(frame_superior, text="Actualizar")
+        btn_actualizar = tk.Button(frame_superior, text="Actualizar", command=self.cargar_productos)
         btn_actualizar.grid(row=0, column=4, padx=5)
 
         btn_cancelar = tk.Button(frame_superior, text="Cancelar", command=self.cancelar)
@@ -53,6 +53,20 @@ class Inventario:
 
         # Asociar el evento de clic para alternar el "checkbox"
         self.tabla.bind("<Double-1>", self.alternar_checkbox)
+
+    def cargar_productos(self):
+        # Limpiar la tabla antes de cargar nuevos datos
+        for item in self.tabla.get_children():
+            self.tabla.delete(item)
+
+        # Obtener los productos del controlador
+        response = self.product_controller.get_all_products()
+        
+        if response['status']:
+            for product in response['data']:
+                self.tabla.insert('', 'end', values=('✖', product['upc'], product['name'], product['stock'], product['description'], product['price']))
+        else:
+            print("Error:", response['message']) 
 
     def nuevo(self):
         # Crear una nueva ventana (Toplevel)
