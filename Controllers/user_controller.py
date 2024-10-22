@@ -127,7 +127,7 @@ class UserController:
         return {
             'status': False,
             'type': 'Error',
-            'message': 'Usuario no existe o contraseña incorrecta'
+            'message': 'El usuario no existe o la contraseña es incorrecta'
         }
 
     def get_next_user_id(self) -> int:
