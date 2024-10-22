@@ -94,7 +94,8 @@ class Venta:
         btn_eliminar.grid(row=4, column=3, padx=10, pady=5)
 
         # Treeview de productos
-        self.tree = ttk.Treeview(self.parent, columns=("nombre", "cantidad", "precio"), show="headings")
+        self.tree = ttk.Treeview(self.parent, columns=("upc_product","nombre", "cantidad", "precio"), show="headings")
+        self.tree.heading("upc_product", text="UPC")
         self.tree.heading("nombre", text="Nombre")
         self.tree.heading("cantidad", text="Cantidad")
         self.tree.heading("precio", text="Precio Individual")
@@ -212,6 +213,7 @@ class Venta:
         producto_seleccionado = self.combobox_producto.get()
         if producto_seleccionado in self.product_data:
             producto = self.product_data[producto_seleccionado]
+            upc_product = producto['upc']
             cantidad = int(self.entry_cantidad.get())  # Cantidad ingresada por el usuario
             precio = producto['price']  # Obtenemos el precio directamente del diccionario
             stock_disponible = producto['stock']  # Obtener el stock del producto
@@ -222,10 +224,10 @@ class Venta:
                 return  # No continuar si hay un error
 
             # Añadir producto al carrito
-            self.cart.add_item(producto_seleccionado, cantidad, precio)
+            self.cart.add_item(upc_product, cantidad, precio)
 
             # Insertar en la tabla de la UI
-            self.tree.insert("", "end", values=(producto_seleccionado, cantidad, precio))
+            self.tree.insert("", "end", values=(upc_product,producto_seleccionado, cantidad, precio))
             
             # Actualizar subtotal y total
             self.actualizar_totales()
@@ -337,8 +339,8 @@ class Venta:
                 
                 # Agregar cada producto al carrito usando el método add_item
                 upc_product = values[0]  # Asumiendo que el UPC del producto está en values[0]
-                quantity = values[1]      # La cantidad está en values[1]
-                price = values[2]         # El precio está en values[2]
+                quantity = values[2]      # La cantidad está en values[1]
+                price = values[3]         # El precio está en values[2]
                 
                 cart.add_item(upc_product, quantity, price)
 
