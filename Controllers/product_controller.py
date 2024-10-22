@@ -100,12 +100,13 @@ class ProductController:
                 'status': True,
                 'type': 'Success',
                 'message': 'Productos encontrados',
-                'data': products
+                'data': products  # Asegúrate de que `products` sea una lista de diccionarios
             }
         return {
             'status': False,
             'type': 'Error',
-            'message': 'Productos no encontrados'
+            'message': 'Productos no encontrados',
+            'data': []  # Asegúrate de que `data` sea una lista vacía si no hay productos
         }
 
     def update_product(self, upc: str, name: str, stock: int, description: str, price: float) -> dict:

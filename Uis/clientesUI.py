@@ -23,7 +23,7 @@ class Clientes:
         self.entry_buscar.grid(row=0, column=1, padx=5)
 
         # Botones principales
-        btn_nuevo = tk.Button(frame_superior, text="Nuevo", command=self.nuevo)
+        btn_nuevo = tk.Button(frame_superior, text="CRUD Clientes", command=self.nuevo)
         btn_nuevo.grid(row=0, column=2, padx=5)
 
         btn_actualizar = tk.Button(frame_superior, text="Actualizar", command=self.cargar_clientes)
@@ -60,6 +60,7 @@ class Clientes:
 
         # Asociar el evento de clic para alternar el "checkbox"
         self.tabla.bind("<Double-1>", self.alternar_checkbox)
+        self.cargar_clientes()
 
     def cargar_clientes(self):
         # Limpiar la tabla antes de cargar nuevos datos
