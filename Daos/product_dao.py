@@ -21,6 +21,22 @@ class ProductDAO:
             cursor.close()
             connection.close()
 
+    #verificar si el producto existe, por medio de su upc
+    @staticmethod
+    def product_exists(upc: str) -> bool:
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            query = "SELECT COUNT(*) FROM products WHERE upc = %s"
+            cursor.execute(query, (upc,))
+            return cursor.fetchone()[0] > 0
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+        finally:
+            cursor.close()
+            connection.close()
+
     @staticmethod
     def get_product_by_upc(upc: str) -> Optional[dict]:
         connection = get_connection()
