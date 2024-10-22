@@ -1,5 +1,5 @@
 from Services.user_service import UserService
-
+import re
 class UserController:
     def __init__(self):
         self.user_service = UserService()
@@ -27,22 +27,12 @@ class UserController:
             msg['message'] = 'El nombre de usuario debe ser un string de máximo 50 caracteres'
             return msg
 
-        # 4. Validar que la contraseña sea un string de máximo 50 caracteres
-        if len(password) > 50:
-            msg['message'] = 'La contraseña debe ser un string de máximo 50 caracteres'
+        # 4. Validar que la contraseña contenga al menos un número, una letra mayúscula y un carácter especial ademas de tener una longitud de 8 a 50 caracteres
+        if not re.match(r'^(?=.*[A-ZÑ])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zÑñ\d@$!%*?&]{8,50}$', password):
+            msg['message'] = 'La contraseña debe contener al menos un número, una letra mayúscula y un carácter especial'
             return msg
 
-        # 5. Validar que la contraseña sea un string de mínimo 8 caracteres
-        if len(password) < 8:
-            msg['message'] = 'La contraseña debe ser un string de mínimo 8 caracteres'
-            return msg
-
-        # 6. Validar que la contraseña contenga al menos un número y una letra en mayúscula
-        if not any(char.isdigit() for char in password) or not any(char.isupper() for char in password):
-            msg['message'] = 'La contraseña debe contener al menos un número y una letra en mayúscula'
-            return msg
-
-        # 7. Validar que el perfil sea un string de máximo 50 caracteres
+        # 5. Validar que el perfil sea un string de máximo 50 caracteres
         if len(profile) > 50:
             msg['message'] = 'El perfil debe ser un string de máximo 50 caracteres'
             return msg
@@ -137,7 +127,7 @@ class UserController:
         return {
             'status': False,
             'type': 'Error',
-            'message': 'Usuario no existe o contraseña incorrecta'
+            'message': 'El usuario no existe o la contraseña es incorrecta'
         }
 
     def get_next_user_id(self) -> int:

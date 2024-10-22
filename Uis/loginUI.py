@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
-from auth_controller import AuthController
+
+from Controllers.user_controller import UserController
 
 class Session:
     """Clase para almacenar información de sesión del usuario."""
@@ -11,10 +12,11 @@ class LoginUI:
     def __init__(self, master, app):
         self.master = master
         self.app = app
-        self.auth_controller = AuthController()
+        self.user_controller = UserController()
 
         # Crear interfaz de login
         self.frame = tk.Frame(self.master)
+        self.master.geometry("300x300")
         self.frame.pack(pady=50)
 
         tk.Label(self.frame, text="Username:").grid(row=0, column=0, padx=10, pady=10)
@@ -31,10 +33,10 @@ class LoginUI:
         username = self.username_entry.get().strip()
         password = self.password_entry.get().strip()
 
-        result = self.auth_controller.login(username, password)
+        result = self.user_controller.verify_user(username, password)
 
         if result['status']:
-            user = result['user']
+            user = result['data']
             Session.current_user_id = user['id']
             messagebox.showinfo("Login Exitoso", f"Bienvenido {user['name']} ({user['profile']})")
             self.master.destroy()  # Cierra la ventana de login
