@@ -16,6 +16,7 @@ class LoginUI:
 
         # Crear interfaz de login
         self.frame = tk.Frame(self.master)
+        self.master.geometry("300x300")
         self.frame.pack(pady=50)
 
         tk.Label(self.frame, text="Username:").grid(row=0, column=0, padx=10, pady=10)
