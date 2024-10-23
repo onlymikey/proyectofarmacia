@@ -18,7 +18,8 @@ class ClientService:
 
     @staticmethod
     def update_client(client_id: int, name: str, email: str, phone: str, points:int) -> bool:
-        client = Client(id=client_id, name=name, email=email, phone=phone, points=points)
+        client = Client(id=client_id, name=name, email=email, phone=phone)
+        client.points = points
         return ClientDAO.update_client(client)
 
     @staticmethod
