@@ -22,9 +22,6 @@ class Venta:
         self.cart = Cart()
         self.client_data = {}
         self.product_data = self.obtener_productos()  # Productos almacenados como diccionario
-
-        print("Productos obtenidos:", self.product_data)  # Agrega esta línea para depuración
-
         self.modo_edicion = False  # Indica si estamos en modo edición
         self.setup_ui()
         self.load_clients()
@@ -46,10 +43,10 @@ class Venta:
         self.btn_cancelar.config(state="disabled")  # Deshabilitado inicialmente
 
         # Buscador
-        btn_buscar = tk.Button(self.parent, text="Buscar")
+        btn_buscar = tk.Button(self.parent, text="Buscar", command=self.buscar_venta)
         btn_buscar.grid(row=0, column=0, padx=10, pady=10)
-        entry_buscar = tk.Entry(self.parent)
-        entry_buscar.grid(row=0, column=1, padx=10, pady=10)
+        self.entry_buscar = tk.Entry(self.parent)
+        self.entry_buscar.grid(row=0, column=1, padx=10, pady=10)
 
         # Folio
         lbl_folio = tk.Label(self.parent, text="Folio:")
@@ -88,10 +85,12 @@ class Venta:
         self.entry_cantidad.grid(row=4, column=1, padx=10, pady=5)
 
         # Botones Añadir y Eliminar
-        btn_anadir = tk.Button(self.parent, text="Añadir", command=self.agregar_producto)
-        btn_anadir.grid(row=4, column=2, padx=10, pady=5)
-        btn_eliminar = tk.Button(self.parent, text="Eliminar", command=self.eliminar_producto)
-        btn_eliminar.grid(row=4, column=3, padx=10, pady=5)
+        self.btn_anadir = tk.Button(self.parent, text="Añadir", command=self.agregar_producto)
+        self.btn_anadir.grid(row=4, column=2, padx=10, pady=5)
+        self.btn_anadir.config(state="disabled")
+        self.btn_eliminar = tk.Button(self.parent, text="Eliminar", command=self.eliminar_producto)
+        self.btn_eliminar.grid(row=4, column=3, padx=10, pady=5)
+        self.btn_eliminar.config(state="disabled")
 
         # Treeview de productos
         self.tree = ttk.Treeview(self.parent, columns=("upc_product","nombre", "cantidad", "precio"), show="headings")
@@ -120,6 +119,48 @@ class Venta:
         # Deshabilitar campos inicialmente
         self.desactivar_campos()
 
+    def buscar_venta(self):
+        folio = self.entry_buscar.get()
+        result = self.sales_register_controller.get_products_by_folio(folio)
+        result2 = self.sale_controller.get_sale_by_folio(folio)
+
+        if result2['status']:
+            self.btn_editar.config(state="normal")
+            self.btn_cancelar.config(state="normal")
+            
+            venta_data = result2['data']
+
+            # Rellenar campos de la venta
+            self.entry_folio.config(state='normal')
+            self.entry_folio.delete(0, tk.END)
+            self.entry_folio.insert(0, folio)
+            self.entry_folio.config(state='readonly')
+
+            # Rellenar combobox de cliente
+            self.combobox_cliente.config(state='normal')
+            self.combobox_cliente.set(venta_data['client_id'])  # Suponiendo que 'cliente' es una clave
+            self.combobox_cliente.config(state='readonly')
+            self.combobox_cliente.config(state='disabled')
+
+            # Actualizar  total
+            self.lbl_total_valor.config(text=f"{venta_data['total']} $")
+
+        if result['status']:
+            product_data = result['data']
+            print(product_data)
+
+            # Limpiar el treeview y rellenar con productos
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+
+            for producto in product_data:
+                self.tree.insert("", "end", values=(
+                    producto['upc_product'], "null", producto['quantity'], "null"
+                ))
+
+        else:
+            print("Error: Venta no encontrada")
+
     def load_clients(self):
         """Cargar clientes desde el controlador y llenar el combobox"""
         response = self.controller.get_all_clients()  # Asegúrate de que este método devuelva los clientes
@@ -145,8 +186,9 @@ class Venta:
         self.activar_campos()
         self.modo_edicion = False  # No estamos en modo edición
         self.btn_pagar.config(state="normal")
-        self.btn_editar.config(state="normal")
         self.btn_cancelar.config(state="normal")
+        self.btn_eliminar.config(state="normal")
+        self.btn_anadir.config(state="normal")
 
     def editar_venta(self):
         """Habilitar los campos para edición (excepto folio) si ya existe una venta seleccionada."""
@@ -154,6 +196,8 @@ class Venta:
             self.activar_campos()
             self.entry_folio.config(state="readonly")  # Folio no debe ser editable
             self.modo_edicion = True
+            self.btn_eliminar.config(state="normal")
+            self.btn_anadir.config(state="normal")
 
     def cancelar_accion(self):
         """Cancelar la acción de crear o editar, y limpiar todos los campos."""
@@ -162,11 +206,17 @@ class Venta:
         self.btn_pagar.config(state="disabled")  # Deshabilitar el botón de Pagar
         self.btn_editar.config(state="disabled")
         self.btn_cancelar.config(state="disabled")
+        self.btn_eliminar.config(state="disabled")
+        self.btn_anadir.config(state="disabled")
+
         self.modo_edicion = False  # Salir del modo edición
 
     def limpiar_campos(self):
         """Limpiar todos los campos de la interfaz."""
+        self.entry_buscar.delete(0, tk.END)
+        self.entry_folio.config(state="normal")
         self.entry_folio.delete(0, tk.END)
+        self.entry_folio.config(state="readonly")
         self.combobox_cliente.set("")
         self.entry_cantidad.delete(0, tk.END)
         self.combobox_producto.set("")
@@ -345,7 +395,6 @@ class Venta:
                 cart.add_item(upc_product, quantity, price)
 
             # Crear instancias de los controladores
-            print(cart)
             sale_controller = SaleController()
             sales_register_controller = SalesRegisterController()
 
