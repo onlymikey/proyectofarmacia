@@ -147,15 +147,16 @@ class Venta:
 
         if result['status']:
             product_data = result['data']
-            print(product_data)
+            #print(product_data)
 
             # Limpiar el treeview y rellenar con productos
             for item in self.tree.get_children():
                 self.tree.delete(item)
 
             for producto in product_data:
+                entire_product = self.product_controller.get_product_by_upc(producto['upc_product'])
                 self.tree.insert("", "end", values=(
-                    producto['upc_product'], "null", producto['quantity'], "null"
+                    producto['upc_product'], entire_product['data']['name'], producto['quantity'], entire_product['data']['price']
                 ))
 
         else:
