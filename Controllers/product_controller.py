@@ -131,3 +131,17 @@ class ProductController:
             'type': 'Error',
             'message': 'Error en el servicio de eliminación de producto'
         }
+
+    def product_exists(self, upc: str) -> dict:
+        """Verifica si un producto ya existe en la base de datos"""
+        if self.product_service.product_exists(upc):
+            return {
+                'status': True,
+                'type': 'Error',
+                'message': 'Producto duplicado'
+            }
+        return {
+            'status': False,
+            'type': 'Success',
+            'message': 'Producto no encontrado'
+        }
