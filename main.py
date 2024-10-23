@@ -12,7 +12,7 @@ class App:
     def __init__(self, master):
         self.master = master
         self.master.title("Mi Aplicación")
-        self.master.geometry("1050x600")
+        self.master.geometry("800x600")
 
         # Inicialmente no mostrar nada hasta hacer login
         self.tab_control = None

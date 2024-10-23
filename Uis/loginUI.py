@@ -2,11 +2,6 @@ import tkinter as tk
 from tkinter import messagebox
 from auth_controller import AuthController
 
-class Session:
-    """Clase para almacenar información de sesión del usuario."""
-    current_user_id = None
-    current_username = None
-
 class LoginUI:
     def __init__(self, master, app):
         self.master = master
@@ -35,7 +30,6 @@ class LoginUI:
 
         if result['status']:
             user = result['user']
-            Session.current_user_id = user['id']
             messagebox.showinfo("Login Exitoso", f"Bienvenido {user['name']} ({user['profile']})")
             self.master.destroy()  # Cierra la ventana de login
 
