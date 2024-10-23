@@ -4,3 +4,4 @@ class Client:
         self.name = name
         self.phone = phone
         self.email = email
+        self.points = 0

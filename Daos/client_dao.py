@@ -56,8 +56,8 @@ class ClientDAO:
         connection = get_connection()
         cursor = connection.cursor()
         try:
-            query = "UPDATE clients SET name = %s, email = %s, phone = %s WHERE id = %s"
-            cursor.execute(query, (client.name, client.email, client.phone, client.id))
+            query = "UPDATE clients SET name = %s, email = %s, phone = %s, points = %s WHERE id = %s"
+            cursor.execute(query, (client.name, client.email, client.phone, client.points, client.id))
             connection.commit()
             return True
         except mysql.connector.Error as err:
