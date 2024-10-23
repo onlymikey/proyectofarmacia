@@ -92,18 +92,22 @@ class ClientController:
             'message': 'Clientes no encontrados'
         }
 
-    def update_client(self, client_id: int, name: str, email: str, phone: str) -> dict:
+    def update_client(self, client_id: int, name: str, email: str, phone: str, points:int) -> dict:
         """Actualiza un cliente"""
         msg = self.validate_client_data(name, email, phone)
         if not msg['status']:
             return msg
-        if self.client_service.update_client(client_id, name, email, phone):
-            msg['status'] = True
-            msg['type'] = 'Success'
-            msg['message'] = 'Cliente actualizado exitosamente'
-        else:
-            msg['message'] = 'Error en el servicio de actualización de cliente'
-        return msg
+        if self.client_service.update_client(client_id, name, email, phone, points):
+            return {
+                'status': True,
+                'type': 'Success',
+                'message': 'Cliente actualizado exitosamente'
+            }
+        return {
+            'status': False,
+            'type': 'Error',
+            'message': 'Error en el servicio de actualización de cliente'
+        }
 
     def delete_client(self, client_id: int) -> dict:
         """Elimina un cliente"""
