@@ -546,10 +546,9 @@ class Venta:
 
                 if total >= 100:
                             puntos = round(total/100)
-                            total_puntos = self.nuevos_puntos + puntos  
-                            print(client_id, cliente_seleccionado, email_cliente, telefono_cliente, total_puntos)
-                            client_controller.update_client(client_id, cliente_seleccionado, email_cliente, telefono_cliente, total_puntos)
-
+                            self.nuevos_puntos =+ puntos  
+                            
+                client_controller.update_client(client_id, cliente_seleccionado, email_cliente, telefono_cliente, self.nuevos_puntos)
                 if sale_response['status']:
                     register_response = sales_register_controller.create_sales_register(folio, cart)
 

@@ -47,12 +47,12 @@ class ClientController:
         return msg
 
 
-    def create_client(self, name: str, email: str, phone: str) -> dict:
+    def create_client(self, name: str, email: str, phone: str, points: int) -> dict:
         """Crea un cliente"""
         msg = self.validate_client_data(name, email, phone)
         if not msg['status']:
             return msg
-        if self.client_service.create_client(name, email, phone):
+        if self.client_service.create_client(name, email, phone, points):
             msg['status'] = True
             msg['type'] = 'Success'
             msg['message'] = 'Cliente creado exitosamente'
@@ -94,6 +94,7 @@ class ClientController:
 
     def update_client(self, client_id: int, name: str, email: str, phone: str, points:int) -> dict:
         """Actualiza un cliente"""
+        print('controller:', client_id, name, email, phone, points)
         msg = self.validate_client_data(name, email, phone)
         if not msg['status']:
             return msg
