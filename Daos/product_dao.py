@@ -100,6 +100,23 @@ class ProductDAO:
             connection.close()
 
     @staticmethod
+    def update_stock(upc: str, stock: int) -> bool:
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            query = "UPDATE products SET stock = %s WHERE upc = %s"
+            cursor.execute(query, (stock, upc))
+            connection.commit()
+            return True
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            connection.rollback()
+            return False
+        finally:
+            cursor.close()
+            connection.close()
+
+    @staticmethod
     def delete_product(upc: str) -> bool:
         connection = get_connection()
         cursor = connection.cursor()

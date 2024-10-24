@@ -28,6 +28,11 @@ class ProductService:
     def update_product(upc: str, name: str, stock: int, description: str, price: float) -> bool:
         product = Product(upc=upc, name=name, stock=stock, description=description, price=price)
         return ProductDAO.update_product(product)
+    
+    @staticmethod
+    def update_stock(upc: str, stock: int) -> bool:
+        return ProductDAO.update_stock(upc, stock)
+    
     @staticmethod
     def delete_product(upc: str) -> bool:
         return ProductDAO.delete_product(upc)

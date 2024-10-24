@@ -1,16 +1,17 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox, simpledialog
 import random
 import string
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import datetime
 from Controllers.sale_controller import SaleController
 from Controllers.sales_register_controller import SalesRegisterController
 from Controllers.product_controller import ProductController
 from Controllers.client_controller import ClientController
+from Controllers.user_controller import UserController
 from Models.cart_model import Cart
 from .loginUI import Session
-from Models.cart_model import Cart
+
 
 class Venta:
     def __init__(self, parent):
@@ -19,6 +20,7 @@ class Venta:
         self.sales_register_controller = SalesRegisterController()
         self.product_controller = ProductController()
         self.controller = ClientController()
+        self.user_controller = UserController()
         self.cart = Cart()
         self.client_data = {}
         self.product_data = self.obtener_productos()  # Productos almacenados como diccionario
@@ -32,10 +34,10 @@ class Venta:
         btn_nuevo = tk.Button(self.parent, text="Nuevo", command=self.nueva_venta)
         btn_nuevo.grid(row=10, column=0, padx=10, pady=10)
 
-        # Botón de Editar
-        self.btn_editar = tk.Button(self.parent, text="Editar", command=self.editar_venta)
-        self.btn_editar.grid(row=10, column=1, padx=10, pady=10)
-        self.btn_editar.config(state="disabled")  # Deshabilitado inicialmente
+        # Botón de eliminar venta
+        self.btn_eliminar_venta = tk.Button(self.parent, text="Eliminar venta", command=self.eliminar_venta)
+        self.btn_eliminar_venta.grid(row=10, column=1, padx=10, pady=10)
+        self.btn_eliminar_venta.config(state="disabled")  # Deshabilitado inicialmente
 
         # Botón de Cancelar
         self.btn_cancelar = tk.Button(self.parent, text="Cancelar", command=self.cancelar_accion)
@@ -57,9 +59,15 @@ class Venta:
         # Cliente
         lbl_cliente = tk.Label(self.parent, text="Cliente:")
         lbl_cliente.grid(row=1, column=2, padx=10, pady=5)
+
         self.combobox_cliente = ttk.Combobox(self.parent, state="readonly")
         self.combobox_cliente.grid(row=1, column=3, padx=10, pady=5)
-        self.combobox_cliente.bind("<<ComboboxSelected>>")
+
+        # Cargar los nombres de los clientes en el combobox
+        self.combobox_cliente['values'] = [client for client in self.client_data.keys()]
+
+        # Asociar el evento de seleccion del combobox
+        self.combobox_cliente.bind("<<ComboboxSelected>>", self.mostrar_points)
 
         # Producto (Combobox)
         lbl_producto = tk.Label(self.parent, text="Producto:")
@@ -71,6 +79,11 @@ class Venta:
     )
         self.combobox_producto.grid(row=3, column=1, padx=10, pady=5)
         self.combobox_producto.bind("<<ComboboxSelected>>", self.mostrar_stock)
+
+        lbl_points = tk.Label(self.parent, text="Puntos:")
+        lbl_points.grid(row=2, column=2, padx=10, pady=5)
+        self.lbl_points_client = tk.Label(self.parent, text="0", relief="sunken", width=10)
+        self.lbl_points_client.grid(row=2, column=3, padx=10, pady=5)
 
         # Stock (Readonly)
         lbl_stock = tk.Label(self.parent, text="Stock:")
@@ -106,8 +119,8 @@ class Venta:
         self.lbl_subtotal_valor = tk.Label(self.parent, text="0.00 $")
         self.lbl_subtotal_valor.grid(row=6, column=3, padx=10, pady=5, sticky="w")
 
-        lbl_total = tk.Label(self.parent, text="Total (IVA 16%):")
-        lbl_total.grid(row=7, column=2, padx=10, pady=5, sticky="e")
+        self.lbl_total = tk.Label(self.parent, text="Total (IVA 16%):")
+        self.lbl_total.grid(row=7, column=2, padx=10, pady=5, sticky="e")
         self.lbl_total_valor = tk.Label(self.parent, text="0.00 $")
         self.lbl_total_valor.grid(row=7, column=3, padx=10, pady=5, sticky="w")
 
@@ -125,7 +138,7 @@ class Venta:
         result2 = self.sale_controller.get_sale_by_folio(folio)
 
         if result2['status']:
-            self.btn_editar.config(state="normal")
+            self.btn_eliminar_venta.config(state="normal")
             self.btn_cancelar.config(state="normal")
             
             venta_data = result2['data']
@@ -145,19 +158,19 @@ class Venta:
             # Actualizar  total
             self.lbl_total_valor.config(text=f"{venta_data['total']} $")
 
-        if result['status']:
-            product_data = result['data']
-            #print(product_data)
+            if result['status']:
+                product_data = result['data']
+                #print(product_data)
 
-            # Limpiar el treeview y rellenar con productos
-            for item in self.tree.get_children():
-                self.tree.delete(item)
+                # Limpiar el treeview y rellenar con productos
+                for item in self.tree.get_children():
+                    self.tree.delete(item)
 
-            for producto in product_data:
-                entire_product = self.product_controller.get_product_by_upc(producto['upc_product'])
-                self.tree.insert("", "end", values=(
-                    producto['upc_product'], entire_product['data']['name'], producto['quantity'], entire_product['data']['price']
-                ))
+                for producto in product_data:
+                    entire_product = self.product_controller.get_product_by_upc(producto['upc_product'])
+                    self.tree.insert("", "end", values=(
+                        producto['upc_product'], entire_product['data']['name'], producto['quantity'], entire_product['data']['price']
+                    ))
 
         else:
             print("Error: Venta no encontrada")
@@ -185,7 +198,6 @@ class Venta:
         self.entry_folio.insert(0, self.folio)
         self.entry_folio.config(state="readonly")
         self.activar_campos()
-        self.modo_edicion = False  # No estamos en modo edición
         self.btn_pagar.config(state="normal")
         self.btn_cancelar.config(state="normal")
         self.btn_eliminar.config(state="normal")
@@ -205,7 +217,7 @@ class Venta:
         self.limpiar_campos()
         self.desactivar_campos()
         self.btn_pagar.config(state="disabled")  # Deshabilitar el botón de Pagar
-        self.btn_editar.config(state="disabled")
+        self.btn_eliminar_venta.config(state="disabled")
         self.btn_cancelar.config(state="disabled")
         self.btn_eliminar.config(state="disabled")
         self.btn_anadir.config(state="disabled")
@@ -221,16 +233,78 @@ class Venta:
         self.combobox_cliente.set("")
         self.entry_cantidad.delete(0, tk.END)
         self.combobox_producto.set("")
+        self.lbl_points_client.config(text="0")
         self.lbl_stock_valor.config(text="0")
         self.lbl_subtotal_valor.config(text="0.00 $")
         self.lbl_total_valor.config(text="0.00 $")
         self.tree.delete(*self.tree.get_children())  # Eliminar todos los productos de la tabla
 
+    def eliminar_venta(self):
+        folio = self.entry_buscar.get()  
+        if folio:
+            # Primero, pedir las credenciales para la autorización
+            username = simpledialog.askstring("Autenticación", "Ingrese su nombre de usuario:")
+            password = simpledialog.askstring("Autenticación", "Ingrese su contraseña:", show='*')
+
+            # Verificar el usuario
+            verification_response = self.user_controller.verify_user(username, password)
+            if not verification_response['status']:
+                messagebox.showerror("Error", verification_response['message'])
+                return  # Si la verificación falla, salir de la función
+
+            # Comprobar el perfil del usuario
+            user_profile = verification_response['data']['profile']  # Suponiendo que 'profile' contiene el tipo de usuario
+            if user_profile not in ['Gerente', 'Admin']:
+                messagebox.showerror("Error", "No tiene permiso para eliminar ventas.")
+                return  # Salir si el perfil no es adecuado
+
+            try:
+                # Obtener los productos de la venta antes de eliminarla
+                productos_vendidos_response = self.sales_register_controller.get_products_by_folio(folio)
+                
+                # Verificar si el resultado fue exitoso
+                if productos_vendidos_response['status']:
+                    productos_vendidos = productos_vendidos_response['data']  # Acceder a la lista de productos
+
+                    # Restaurar el stock de los productos
+                    for producto in productos_vendidos:
+                        upc_product = producto['upc_product']  # UPC del producto
+                        cantidad_vendida = producto['quantity']  # Cantidad que se vendió
+
+                        # Obtener el stock actual del producto
+                        producto_data_response = self.product_controller.get_product_by_upc(upc_product)
+                        producto_data = producto_data_response['data']
+                        producto_name = producto_data['name']
+
+                        if producto_name in self.product_data:
+                            stock_actual = producto_data['stock']
+
+                            # Sumar la cantidad vendida al stock actual
+                            nuevo_stock = stock_actual + cantidad_vendida
+                            self.product_controller.update_stock(upc_product, nuevo_stock)
+                            print(f"Producto {upc_product}: Stock actualizado a {nuevo_stock}")
+                        else:
+                            print(f"No se encontró el campo 'stock' para el producto {upc_product}")
+                            messagebox.showerror("Error", f"El producto {upc_product} no tiene información de stock.")
+
+                    # Después de actualizar el stock, proceder a eliminar la venta
+                    resultado = self.sale_controller.delete_sale(folio)
+                    if resultado['status']:
+                        messagebox.showinfo("Éxito", resultado['message'])
+                        self.cancelar_accion()  # Actualizar la tabla de ventas para reflejar los cambios
+                    else:
+                        messagebox.showerror("Error", resultado['message'])
+                else:
+                    messagebox.showerror("Error", productos_vendidos_response['message'])
+
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo eliminar la venta: {str(e)}")
+        else:
+            messagebox.showwarning("Advertencia", "Por favor, selecciona una venta para eliminar.")
+
     def activar_campos(self):
         """Habilitar los campos para permitir la creación o edición de una venta."""
         self.combobox_cliente.config(state="readonly")
-        self.entry_cantidad.config(state="normal")
-        self.combobox_producto.config(state="readonly")
 
     def desactivar_campos(self):
         """Desactivar todos los campos para evitar cambios si no se ha iniciado una nueva venta."""
@@ -259,67 +333,120 @@ class Venta:
         else:
             self.lbl_stock_valor.config(text="0")
 
+    # Función para mostrar puntos
+    def mostrar_points(self, event):
+        cliente_seleccionado = self.combobox_cliente.get()
+        self.combobox_cliente.config(state="disabled")
+        self.entry_cantidad.config(state="normal")
+        self.combobox_producto.config(state="readonly")
+        if cliente_seleccionado in self.client_data:
+            self.puntos_cliente = self.client_data[cliente_seleccionado]['points']
+            self.lbl_points_client.config(text=str(self.puntos_cliente))
+        else:
+            self.lbl_points_client.config(text="0")
+
     def agregar_producto(self):
-        """Agregar producto al carrito"""
+        """Agregar producto al carrito y actualizar el stock"""
         producto_seleccionado = self.combobox_producto.get()
         if producto_seleccionado in self.product_data:
-            producto = self.product_data[producto_seleccionado]
-            upc_product = producto['upc']
+            self.producto = self.product_data[producto_seleccionado]
+            upc_product = self.producto['upc']
             cantidad = int(self.entry_cantidad.get())  # Cantidad ingresada por el usuario
-            precio = producto['price']  # Obtenemos el precio directamente del diccionario
-            stock_disponible = producto['stock']  # Obtener el stock del producto
+            precio = self.producto['price']  # Obtenemos el precio directamente del diccionario
+            stock_disponible = self.producto['stock']  # Obtener el stock del producto
 
             # Validar que la cantidad no sea mayor que el stock disponible
             if cantidad > stock_disponible:
                 tk.messagebox.showerror("Error", "La cantidad ingresada supera el stock disponible.")
                 return  # No continuar si hay un error
 
+            # Restar la cantidad al stock disponible
+            self.producto['stock'] -= cantidad
+            self.lbl_stock_valor.config(text=str(self.producto['stock']))  # Actualizar la UI
+
             # Añadir producto al carrito
             self.cart.add_item(upc_product, cantidad, precio)
 
             # Insertar en la tabla de la UI
-            self.tree.insert("", "end", values=(upc_product,producto_seleccionado, cantidad, precio))
-            
+            self.tree.insert("", "end", values=(upc_product, producto_seleccionado, cantidad, precio))
+
             # Actualizar subtotal y total
             self.actualizar_totales()
         else:
             tk.messagebox.showerror("Error", "Producto no encontrado")
 
     def eliminar_producto(self):
-        """Eliminar el producto seleccionado del carrito"""
+        """Eliminar el producto seleccionado del carrito y actualizar el stock"""
         selected_item = self.tree.selection()
         if selected_item:
             item = self.tree.item(selected_item)
-            producto = item['values'][1]
-            self.cart.remove_item(producto)
+            producto_seleccionado = item['values'][1]  # Nombre del producto
+            cantidad = item['values'][2]  # Cantidad que se va a eliminar
+            upc_product = item['values'][0]  # UPC del producto
+
+            # Eliminar producto del carrito
+            self.cart.remove_item(upc_product)
+
+            # Sumar la cantidad eliminada al stock del producto
+            if producto_seleccionado in self.product_data:
+                producto = self.product_data[producto_seleccionado]
+                producto['stock'] += cantidad  # Sumar la cantidad al stock
+                self.lbl_stock_valor.config(text=str(producto['stock']))  # Actualizar la UI
+
+            # Eliminar el producto de la tabla
             self.tree.delete(selected_item)
+
+            # Actualizar subtotal y total
             self.actualizar_totales()
 
     def actualizar_totales(self):
-        """Actualizar el subtotal y el total con IVA."""
-        subtotal = self.cart.calculate_subtotal()  # Calcula el subtotal
-        
-        if not isinstance(subtotal, Decimal):
-            subtotal = Decimal(subtotal)
+        subtotal = 0
+        puntos_actuales = self.puntos_cliente
+        # Agregar los productos del Treeview al carrito
+        for item in self.tree.get_children():  # Itera sobre todos los elementos en el Treeview
+            values = self.tree.item(item)['values']  # Obtiene los valores del item
+            cantidad = int(values[2])
+            price = float(values[3])
+            productos = cantidad * price
+            subtotal += productos 
 
-        iva = Decimal(0.16)  # 16% de IVA
-        total = subtotal * (Decimal(1) + iva)  # Sumar el IVA al subtotal
+        # Calculamos el IVA
+        iva = subtotal * 0.16
+        total = subtotal + iva
 
-        self.lbl_subtotal_valor.config(text=f"{subtotal:.2f} $")  # Muestra el subtotal
-        self.lbl_total_valor.config(text=f"{total:.2f} $")  # Muestra el total con IVA
+        if puntos_actuales >= 50:
+            total *= 0.5  # Aplicar descuento del 50%
+            self.nuevos_puntos = puntos_actuales - 50
+            
+            self.lbl_total.config(text=f"Total (IVA 16% + Desc 50%):")
+            self.lbl_subtotal_valor.config(text=f"{subtotal:.2f}")
+            self.lbl_total_valor.config(text=f"{total:.2f}")
+
+        if puntos_actuales < 50:
+            # Actualizamos las etiquetas de la interfaz
+            self.lbl_subtotal_valor.config(text=f"{subtotal:.2f}")
+            self.lbl_total_valor.config(text=f"{total:.2f}")
+
+        # Opcional: Si el carrito está vacío, puedes resetear los valores.
+        if not self.tree:
+            self.lbl_subtotal_valor.config(text="Subtotal: $0.00")
+            self.lbl_subtotal_valor.config(text="Total: $0.00")
 
     def abrir_ventana_pago(self):
         """Abrir la ventana para el método de pago"""
         ventana_pago = tk.Toplevel(self.parent)
         ventana_pago.title("Método de Pago")
         ventana_pago.geometry("300x250")
-
+        client_controller = ClientController()
+        product_controller = ProductController()
         folio_venta = self.entry_folio.get()
 
          # Obtener el nombre del cliente seleccionado
         cliente_seleccionado = self.combobox_cliente.get()
         if cliente_seleccionado in self.client_data:
             cliente_id = self.client_data[cliente_seleccionado]['id']  # Asegúrate de que 'id' sea el nombre correcto de la clave
+            email_cliente = self.client_data[cliente_seleccionado]['email']
+            telefono_cliente = self.client_data[cliente_seleccionado]['phone']
         else:
             tk.messagebox.showerror("Error", "Por favor, selecciona un cliente válido.")
             return
@@ -375,43 +502,67 @@ class Venta:
         entry_cantidad.bind("<KeyRelease>", actualizar_cambio)
 
         def aceptar_pago():
-            # Obtener los datos necesarios
-            folio = folio_venta
-            client_id = cliente_id  
-            user_id = Session.current_user_id 
-            date = datetime.datetime.now().strftime('%d-%m-%Y')
-            total = float(self.lbl_total_valor.cget('text').replace('$', '').strip())
+            try:
+                cantidad_recibida = Decimal(entry_cantidad.get())  # Obtener la cantidad ingresada
+                total = Decimal(self.lbl_total_valor.cget('text').replace('$', '').strip())  # Obtener el total a pagar
 
-            cart = Cart()
 
-            # Agregar los productos del Treeview al carrito
-            for item in self.tree.get_children():  # Itera sobre todos los elementos en el Treeview
-                values = self.tree.item(item)['values']  # Obtiene los valores del item
-                
-                # Agregar cada producto al carrito usando el método add_item
-                upc_product = values[0]  # Asumiendo que el UPC del producto está en values[0]
-                quantity = values[2]      # La cantidad está en values[1]
-                price = values[3]         # El precio está en values[2]
-                
-                cart.add_item(upc_product, quantity, price)
 
-            # Crear instancias de los controladores
-            sale_controller = SaleController()
-            sales_register_controller = SalesRegisterController()
+                # Validar que la cantidad recibida sea mayor o igual al total
+                if cantidad_recibida < total:
+                    tk.messagebox.showerror("Error", "La cantidad recibida no puede ser menor que el total de la venta.")
+                    return  # Evitar que se continúe con el registro de la venta
 
-            # Crear la venta
-            sale_response = sale_controller.create_sale(folio, client_id, user_id, date, total)
+                folio = folio_venta
+                client_id = cliente_id  
+                user_id = Session.current_user_id 
+                date = datetime.datetime.now().strftime('%d-%m-%Y')
+                total = float(self.lbl_total_valor.cget('text').replace('$', '').strip())
 
-            if sale_response['status']:
-                register_response = sales_register_controller.create_sales_register(folio, cart)
+                cart = Cart()
 
-                if register_response['status']:
-                    tk.messagebox.showinfo("Éxito", "Venta registrada exitosamente.")
-                    ventana_pago.destroy()  # Cerrar la ventana de pago
+                # Agregar los productos del Treeview al carrito
+                for item in self.tree.get_children():  # Itera sobre todos los elementos en el Treeview
+                    values = self.tree.item(item)['values']  # Obtiene los valores del item
+                    
+                    # Agregar cada producto al carrito usando el método add_item
+                    upc_product = values[0]
+                    name_product = values[1]  # Asumiendo que el UPC del producto está en values[0]
+                    quantity = values[2]      # La cantidad está en values[2]
+                    price = values[3]        # El precio está en values[3]
+                    if name_product in self.product_data:
+                        self.producto = self.product_data[name_product]
+                        nuevo_stock = self.producto['stock']
+                        product_controller.update_stock(upc_product, nuevo_stock)
+
+                    cart.add_item(upc_product, quantity, price)
+
+                # Crear instancias de los controladores
+                sale_controller = SaleController()
+                sales_register_controller = SalesRegisterController()
+
+                # Crear la venta
+                sale_response = sale_controller.create_sale(folio, client_id, user_id, date, total)
+
+                if total >= 100:
+                            puntos = round(total/100)
+                            total_puntos = self.nuevos_puntos + puntos  
+                            print(client_id, cliente_seleccionado, email_cliente, telefono_cliente, total_puntos)
+                            client_controller.update_client(client_id, cliente_seleccionado, email_cliente, telefono_cliente, total_puntos)
+
+                if sale_response['status']:
+                    register_response = sales_register_controller.create_sales_register(folio, cart)
+
+                    if register_response['status']:
+                        tk.messagebox.showinfo("Éxito", "Venta registrada exitosamente.")
+                        ventana_pago.destroy()  # Cerrar la ventana de pago
+                    else:
+                        tk.messagebox.showerror("Error", register_response['message'])
                 else:
-                    tk.messagebox.showerror("Error", register_response['message'])
-            else:
-                tk.messagebox.showerror("Error", sale_response['message'])
+                    tk.messagebox.showerror("Error", sale_response['message'])
+            except (ValueError, InvalidOperation):
+                tk.messagebox.showerror("Error", "Por favor, ingresa una cantidad válida.")
+            self.cancelar_accion()
 
 
         btn_aceptar = tk.Button(ventana_pago, text="Aceptar", command= aceptar_pago)

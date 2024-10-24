@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from Controllers.client_controller import ClientController
+from .clientesCRUD import ClientesCRUD
 
 class Clientes:
     def __init__(self, parent):
@@ -46,7 +47,7 @@ class Clientes:
         frame_tabla.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Configuración de la tabla
-        cols = ('Seleccionado', 'ID', 'Nombre', 'Email', 'Teléfono')
+        cols = ('Seleccionado', 'ID', 'Nombre', 'Email', 'Teléfono', 'Puntos')
         self.tabla = ttk.Treeview(frame_tabla, columns=cols, show='headings')
 
         for col in cols:
@@ -72,7 +73,7 @@ class Clientes:
 
         if response['status']:
             for client in response['data']:
-                self.tabla.insert('', 'end', values=('✖', client['id'], client['name'], client['email'], client['phone']))
+                self.tabla.insert('', 'end', values=('✖', client['id'], client['name'], client['email'], client['phone'], client['points']))
         else:
             print("Error:", response['message'])  # Puedes mostrar un mensaje en la UI si lo prefieres
 
@@ -117,8 +118,9 @@ class Clientes:
             name = current_values[2]
             email = current_values[3]
             phone = current_values[4]
+            points = current_values[5]
 
-            response = self.client_controller.update_client(client_id, name, email, phone)
+            response = self.client_controller.update_client(client_id, name, email, phone, points)
             if response['status']:
                 cambios_guardados = True
                 entry.destroy()  # Desactivar el Entry y volver a la vista de la tabla

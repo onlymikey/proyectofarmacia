@@ -32,13 +32,17 @@ class ClientesCRUD:
         self.telefono_entry.grid(row=3, column=1, padx=10, pady=10)
 
         ttk.Label(clients_frame, text="Email:").grid(row=4, column=0, padx=10, pady=10)
-        self.email_entry = ttk.Entry(clients_frame, show="*")
+        self.email_entry = ttk.Entry(clients_frame)
         self.email_entry.grid(row=4, column=1, padx=10, pady=10)
+    
+        ttk.Label(clients_frame, text="puntos:").grid(row=5, column=0, padx=10, pady=10)
+        self.puntos_entry = ttk.Entry(clients_frame, state = 'disabled')
+        self.puntos_entry.grid(row=5, column=1, padx=10, pady=10)
 
-        ttk.Button(clients_frame, text="Nuevo", command=self.nuevo_cliente).grid(row=5, column=0, padx=10, pady=10)
-        ttk.Button(clients_frame, text="Guardar", command=self.guardar_cliente).grid(row=5, column=1, padx=10, pady=10)
-        ttk.Button(clients_frame, text="Editar", command=self.editar_user).grid(row=5, column=2, padx=10, pady=10)
-        ttk.Button(clients_frame, text="Eliminar", command=self.eliminar_cliente).grid(row=5, column=3, padx=10, pady=10)
+        ttk.Button(clients_frame, text="Nuevo", command=self.nuevo_cliente).grid(row=6, column=0, padx=10, pady=10)
+        ttk.Button(clients_frame, text="Guardar", command=self.guardar_cliente).grid(row=6, column=1, padx=10, pady=10)
+        ttk.Button(clients_frame, text="Editar", command=self.editar_user).grid(row=6, column=2, padx=10, pady=10)
+        ttk.Button(clients_frame, text="Eliminar", command=self.eliminar_cliente).grid(row=6, column=3, padx=10, pady=10)
 
     # Función para obtener el siguiente ID disponible en la tabla
     def obtener_siguiente_id(self):
@@ -80,6 +84,12 @@ class ClientesCRUD:
 
             self.email_entry.delete(0, tk.END)
             self.email_entry.insert(0, user['email'])  # Asumiendo que 'email' es el atributo del cliente
+
+            self.puntos_entry.config(state='normal')
+            self.puntos_entry.delete(0, tk.END)
+            self.puntos_entry.insert(0, user['points'])
+            self.puntos_entry.config(state='disabled')
+
         else:  # Si no hay usuario, simplemente limpiamos todos los campos
             self.id_entry.config(state='normal')
             self.id_entry.delete(0, tk.END)
@@ -88,6 +98,10 @@ class ClientesCRUD:
             self.nombre_entry.delete(0, tk.END)
             self.telefono_entry.delete(0, tk.END)
             self.email_entry.delete(0, tk.END)
+
+            self.puntos_entry.config(state='normal')
+            self.puntos_entry.delete(0, tk.END)
+            self.puntos_entry.config(state='disabled')
 
 
     def nuevo_cliente(self):
@@ -106,11 +120,12 @@ class ClientesCRUD:
         name = self.nombre_entry.get()
         phone = self.telefono_entry.get()
         email = self.email_entry.get()
+        points = self.puntos_entry.get()
 
 
         if client_id_act and client_id_act.isdigit():  # Comprobamos si hay un ID válido
             # Si el campo ID tiene un valor, estamos actualizando un cliente existente
-            resultado = self.client_controller.update_client(int(client_id), name, email, phone)
+            resultado = self.client_controller.update_client(int(client_id), name, email, phone, points)
         else:
             # Si no hay ID, estamos creando un nuevo cliente
             resultado = self.client_controller.create_client(name, email, phone)
