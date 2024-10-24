@@ -26,7 +26,6 @@ class Venta:
         self.product_data = self.obtener_productos()  # Productos almacenados como diccionario
         self.modo_edicion = False  # Indica si estamos en modo edición
         self.setup_ui()
-        self.load_clients()
 
         
     def setup_ui(self):
@@ -192,6 +191,8 @@ class Venta:
 
     def nueva_venta(self):
         """Habilitar campos y asignar un folio automáticamente."""
+        self.load_clients()
+        self.product_data = self.obtener_productos()
         self.limpiar_campos()
         self.folio = self.generar_folio()  # Asigna un nuevo folio automáticamente
         self.entry_folio.config(state="normal")

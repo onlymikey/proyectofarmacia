@@ -20,10 +20,9 @@ class Compra:
         self.supplier_controller = SupplierController()
         self.cart = Cart()
         self.supplier_data = {}
-        self.product_data = self.obtener_productos() 
+        self.product_data = self.obtener_productos()
         self.setup_ui()
         self.cancelar_accion()
-        self.load_suppliers()
 
     def setup_ui(self):
         # Buscador
@@ -194,6 +193,8 @@ class Compra:
 
     def nueva_compra(self):
         """Habilitar campos y asignar un folio automáticamente."""
+        self.load_suppliers()
+        self.product_data = self.obtener_productos()
         self.limpiar_campos()
         self.folio = self.generar_folio()  # Asigna un nuevo folio automáticamente
         self.entry_folio.config(state="normal")
