@@ -33,7 +33,7 @@ class ProductController:
             return msg
 
         # 6. Validar que el precio sea un número positivo
-        if not price >= 0:
+        if not price > 0:
             msg['message'] = 'El precio debe ser un número positivo'
             return msg
 
@@ -96,12 +96,13 @@ class ProductController:
                 'status': True,
                 'type': 'Success',
                 'message': 'Productos encontrados',
-                'data': products
+                'data': products  # Asegúrate de que `products` sea una lista de diccionarios
             }
         return {
             'status': False,
             'type': 'Error',
-            'message': 'Productos no encontrados'
+            'message': 'Productos no encontrados',
+            'data': []  # Asegúrate de que `data` sea una lista vacía si no hay productos
         }
 
     def update_product(self, upc: str, name: str, stock: int, description: str, price: float) -> dict:
@@ -116,6 +117,27 @@ class ProductController:
         else:
             msg['message'] = 'Error en el servicio de actualización de producto'
         return msg
+    
+    def update_stock(self, upc: str, stock: int) -> dict:
+        """Actualiza solo el stock de un producto"""
+        if stock < 0:
+            return {
+                'status': False,
+                'type': 'Error',
+                'message': 'El stock no puede ser negativo'
+            }
+        
+        if self.product_service.update_stock(upc, stock):
+            return {
+                'status': True,
+                'type': 'Success',
+                'message': 'Stock actualizado exitosamente'
+            }
+        return {
+            'status': False,
+            'type': 'Error',
+            'message': 'Error en el servicio de actualización de stock'
+        }
 
     def delete_product(self, upc: str) -> dict:
         """Elimina un producto"""
@@ -129,4 +151,18 @@ class ProductController:
             'status': False,
             'type': 'Error',
             'message': 'Error en el servicio de eliminación de producto'
+        }
+
+    def product_exists(self, upc: str) -> dict:
+        """Verifica si un producto ya existe en la base de datos"""
+        if self.product_service.product_exists(upc):
+            return {
+                'status': True,
+                'type': 'Error',
+                'message': 'Producto duplicado'
+            }
+        return {
+            'status': False,
+            'type': 'Success',
+            'message': 'Producto no encontrado'
         }

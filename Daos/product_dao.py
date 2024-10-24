@@ -21,6 +21,22 @@ class ProductDAO:
             cursor.close()
             connection.close()
 
+    #verificar si el producto existe, por medio de su upc
+    @staticmethod
+    def product_exists(upc: str) -> bool:
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            query = "SELECT COUNT(*) FROM products WHERE upc = %s"
+            cursor.execute(query, (upc,))
+            return cursor.fetchone()[0] > 0
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+        finally:
+            cursor.close()
+            connection.close()
+
     @staticmethod
     def get_product_by_upc(upc: str) -> Optional[dict]:
         connection = get_connection()
@@ -73,6 +89,23 @@ class ProductDAO:
         try:
             query = "UPDATE products SET name = %s, stock = %s, description = %s, price = %s WHERE upc = %s"
             cursor.execute(query, (product.name, product.stock, product.description, product.price, product.upc))
+            connection.commit()
+            return True
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            connection.rollback()
+            return False
+        finally:
+            cursor.close()
+            connection.close()
+
+    @staticmethod
+    def update_stock(upc: str, stock: int) -> bool:
+        connection = get_connection()
+        cursor = connection.cursor()
+        try:
+            query = "UPDATE products SET stock = %s WHERE upc = %s"
+            cursor.execute(query, (stock, upc))
             connection.commit()
             return True
         except mysql.connector.Error as err:

@@ -7,6 +7,10 @@ class ProductService:
     def create_product(upc: str, name: str, stock: int, description: str, price: float) -> Optional[int]:
         product = Product(upc=upc, name=name, stock=stock, description=description, price=price)
         return ProductDAO.create_product(product)
+    
+    @staticmethod
+    def product_exists(upc: str) -> bool:
+        return ProductDAO.product_exists(upc)
 
     @staticmethod
     def get_product_by_upc(upc: str) -> Optional[Dict]:
@@ -24,7 +28,11 @@ class ProductService:
     def update_product(upc: str, name: str, stock: int, description: str, price: float) -> bool:
         product = Product(upc=upc, name=name, stock=stock, description=description, price=price)
         return ProductDAO.update_product(product)
-
+    
+    @staticmethod
+    def update_stock(upc: str, stock: int) -> bool:
+        return ProductDAO.update_stock(upc, stock)
+    
     @staticmethod
     def delete_product(upc: str) -> bool:
         return ProductDAO.delete_product(upc)

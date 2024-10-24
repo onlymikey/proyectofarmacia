@@ -14,7 +14,7 @@ class SaleController:
             'message': ''
         }
         # 1. Validar todos los campos obligatorios
-        if not folio or not user_id or not total or not date:
+        if not folio or not client_id or not user_id or not total or not date:
             msg['message'] = 'Todos los campos son obligatorios'
             return msg
 
@@ -34,7 +34,7 @@ class SaleController:
             return msg
 
         # 5. Validar que el total sea un número positivo
-        if not total >= 0:
+        if not total > 0:
             msg['message'] = 'El total debe ser un número positivo'
             return msg
 

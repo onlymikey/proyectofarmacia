@@ -12,10 +12,10 @@ class App:
     def __init__(self, master):
         self.master = master
         self.master.title("Mi Aplicación")
-        self.master.geometry("800x600")
+        self.master.geometry("1050x600")
 
         # Inicialmente no mostrar nada hasta hacer login
-        self.tab_control = None
+        self.master.withdraw()
 
         # Lanzar la interfaz de login
         self.show_login()
@@ -25,8 +25,13 @@ class App:
         login_window.title("Login")
         login_ui = LoginUI(login_window, self)
 
+        # Configurar la ventana de login como modal
+        login_window.grab_set()
+        self.master.wait_window(login_window)
+
     def init_app(self, profile):
         """ Inicializar las pestañas y el menú según el perfil del usuario """
+        self.master.deiconify()
         self.tab_control = ttk.Notebook(self.master)
         self.tab_control.pack(expand=1, fill="both")
 
