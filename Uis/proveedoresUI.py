@@ -90,10 +90,3 @@ class SuppliersCRUD:
         messagebox.showinfo(result['type'], result['message'])
         if result['status']:
             self.clear_fields()
-
-# Ejecución de la interfaz
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("CRUD Proveedores")
-    SuppliersCRUD(root)
-    root.mainloop()
