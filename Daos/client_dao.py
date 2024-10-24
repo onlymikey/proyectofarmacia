@@ -9,8 +9,8 @@ class ClientDAO:
         connection = get_connection()
         cursor = connection.cursor()
         try:
-            query = "INSERT INTO clients (name, email, phone) VALUES (%s, %s, %s)"
-            cursor.execute(query, (client.name, client.email, client.phone))
+            query = "INSERT INTO clients (name, email, phone, points) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query, (client.name, client.email, client.phone, client.points))
             connection.commit()
             return cursor.lastrowid
         except mysql.connector.Error as err:

@@ -128,7 +128,7 @@ class ClientesCRUD:
             resultado = self.client_controller.update_client(int(client_id), name, email, phone, points)
         else:
             # Si no hay ID, estamos creando un nuevo cliente
-            resultado = self.client_controller.create_client(name, email, phone)
+            resultado = self.client_controller.create_client(name, email, phone, 0)
 
         if resultado['status']:
             messagebox.showinfo("Éxito", resultado['message'])
