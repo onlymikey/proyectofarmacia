@@ -117,6 +117,27 @@ class ProductController:
         else:
             msg['message'] = 'Error en el servicio de actualización de producto'
         return msg
+    
+    def update_stock(self, upc: str, stock: int) -> dict:
+        """Actualiza solo el stock de un producto"""
+        if stock < 0:
+            return {
+                'status': False,
+                'type': 'Error',
+                'message': 'El stock no puede ser negativo'
+            }
+        
+        if self.product_service.update_stock(upc, stock):
+            return {
+                'status': True,
+                'type': 'Success',
+                'message': 'Stock actualizado exitosamente'
+            }
+        return {
+            'status': False,
+            'type': 'Error',
+            'message': 'Error en el servicio de actualización de stock'
+        }
 
     def delete_product(self, upc: str) -> dict:
         """Elimina un producto"""
